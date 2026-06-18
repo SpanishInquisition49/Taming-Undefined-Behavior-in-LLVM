@@ -1,0 +1,195 @@
+% beamerthemeUnipiPisa.sty
+% Adattamento Unipi del tema UC Berkeley (v1.2, 5 gennaio 2021)
+% Autori: Gabriele Scannagatti 2026
+
+\ProvidesPackage{beamerthemeSNSPisa}
+
+% ============================================================
+% MATEMATICA E AMBIENTI
+% ============================================================
+\RequirePackage{mathtools}
+\RequirePackage{amsthm}
+\RequirePackage{amsfonts}
+\RequirePackage{amssymb}
+\RequirePackage{faktor}
+\RequirePackage{tikz-cd}
+
+% ============================================================
+% AVVISI DI LOG
+% ============================================================
+\RequirePackage{silence}
+\WarningsOff[mathdesign/mdbch]
+
+
+% ============================================================
+% FONT
+% ============================================================
+\RequirePackage{fontspec}
+\setmainfont{EB Garamond} % Titles
+\setsansfont{Fira Sans}[Scale=MatchLowercase] % body
+
+% ============================================================
+% GRAFICA E IMMAGINI
+% ============================================================
+\RequirePackage{graphicx, wrapfig}
+\graphicspath{{./images/}}
+
+\RequirePackage{tikz}
+\RequirePackage{tcolorbox}
+
+% ============================================================
+% VARIE
+% ============================================================
+\RequirePackage{ragged2e}
+\RequirePackage{etoolbox}
+\RequirePackage{epigraph}
+\setlength\epigraphwidth{0.8\textwidth}
+\setlength\epigraphrule{0pt}
+\renewcommand{\textflush}{flushepinormal}
+
+% ============================================================
+% COLORI
+% ============================================================
+
+% Colori ufficiali SNS (da loghi storici)
+\definecolor{Red}{RGB}{128, 0, 32}
+\definecolor{UnipiBlue}{HTML}{00508B}
+\definecolor{SNSGold}{RGB}{249, 195, 100}
+\definecolor{SNSGreen}{RGB}{0, 69, 38}
+\definecolor{UnipiRed}{HTML}{8B1A00}
+\definecolor{UnipiGreen}{HTML}{2E8B57}
+\definecolor{UnipiRedBold}{HTML}{8B1A1A}
+\definecolor{UnipiGreenBold}{HTML}{2E7D52}
+
+% Colori del template UC Berkeley (originale) 
+%\definecolor{BerkeleyBlue}{HTML}{003262}
+\definecolor{BerkeleyBlue}{HTML}{003A66}
+%\definecolor{BerkeleyBlueText}{RGB}{48, 99, 126}
+\definecolor{BerkeleyBlueText}{HTML}{1A6FA0}
+\definecolor{BerkeleyGold}{RGB}{193, 129, 45}
+\definecolor{Medalist}{HTML}{C4820E}
+\definecolor{FoundersRock}{HTML}{3B7EA1}
+\definecolor{CaliforniaGold}{HTML}{FDB515}
+\definecolor{BerkeleyTableGold}{RGB}{222, 157, 46}
+\definecolor{BerkeleyTableBlue1}{RGB}{207, 226, 234}
+\definecolor{BerkeleyTableBlue2}{RGB}{232, 241, 245}
+
+% ============================================================
+% LAYOUT GENERALE
+% ============================================================
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}[numbered]
+\setbeamersize{text margin left=2em, text margin right=2em}
+
+% ============================================================
+% COLORI BEAMER
+% ============================================================
+\setbeamercolor{titlelike}{fg=UnipiBlue}
+\setbeamercolor{author}{fg=BerkeleyBlue}
+\setbeamercolor{institute}{fg=BerkeleyBlue}
+\setbeamercolor{date}{fg=UnipiBlue}
+\setbeamercolor{normal text}{fg=BerkeleyBlueText}
+\setbeamercolor{structure}{fg=UnipiBlue}
+\setbeamercolor{block title}{fg=BerkeleyBlue}
+\setbeamercolor{section in toc}{fg=BerkeleyBlue}
+\setbeamercolor{subsection in toc}{fg=UnipiBlue}
+
+% ============================================================
+% FONT BEAMER
+% ============================================================
+\setbeamerfont{title}{size=\Huge}
+\setbeamerfont{author}{family=\rmfamily, shape=\scshape, size=\footnotesize}
+\setbeamerfont{institute}{family=\rmfamily, shape=\scshape, size=\scriptsize}
+\setbeamerfont{date}{family=\rmfamily, shape=\scshape, size=\scriptsize}
+\setbeamerfont{frametitle}{family=\rmfamily, series=\mdseries, size=\Large}
+\setbeamerfont{block title}{family=\rmfamily, size=\large}
+
+% ============================================================
+% TEMPLATE TITOLO E SOMMARIO
+% ============================================================
+%\setbeamertemplate{title page}[default][left]
+\setbeamertemplate{title page}{%
+  % Titolo e Sottotitolo (nel flusso normale della pagina)
+  \vspace{0.12\paperheight}
+  \begin{beamercolorbox}[wd=\textwidth, leftskip=0pt]{title}
+    \usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par
+    \ifx\insertsubtitle\@empty\else
+      \vskip0.4em
+      {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+    \fi
+  \end{beamercolorbox}
+  
+  % Posizionamento assoluto sopra la striscia blu a sinistra
+  \begin{tikzpicture}[remember picture, overlay]
+    % Calibriamo l'altezza (yshift) per allinearci al logo a destra.
+    % 'xshift' aggiunge un piccolo margine dal bordo sinistro dello schermo.
+    \node [anchor=south west, inner sep=0pt] at ([xshift=0.03\paperwidth, yshift=0.03\paperheight]current page.south west) {%
+      \begin{beamercolorbox}[wd=0.6\paperwidth, leftskip=0pt]{author}
+        {\usebeamerfont{author}\color{white}\insertauthor}%
+        \ifx\insertdate\@empty\else
+           {\usebeamerfont{date}\color{white},\, \insertdate}%
+        \fi
+      \end{beamercolorbox}
+    };
+  \end{tikzpicture}
+}
+
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}{%
+  \leavevmode\leftskip=3.2em
+  \rlap{\hskip-2em\inserttocsectionnumber.\inserttocsubsectionnumber}%
+  \inserttocsubsection\par
+}
+
+% ============================================================
+% TITOLO DEI FRAME
+% ============================================================
+\setbeamertemplate{frametitle}{\vskip0.06\paperheight\insertframetitle}
+
+% Varianti del titolo del frame (da usare nel documento principale)
+\newcommand{\smallframetitle}{%
+  \setbeamertemplate{frametitle}{\vskip0.15\paperheight\insertframetitle}%
+  \setbeamerfont{frametitle}{size=\large, series=\bfseries}%
+}
+\newcommand{\normalframetitle}{%
+  \setbeamertemplate{frametitle}{\vskip0.15\paperheight\insertframetitle}%
+  \setbeamerfont{frametitle}{size=\LARGE, series=\mdseries}%
+}
+
+% ============================================================
+% ELENCHI PUNTATI
+% ============================================================
+\setbeamertemplate{itemize item}{\textbullet}
+\setbeamertemplate{itemize subitem}{--}
+\setbeamertemplate{itemize subsubitem}{\textbullet}
+\setlength{\leftmargini}{1.25em}
+\setlength{\leftmarginii}{1em}
+\setlength{\leftmarginiii}{1em}
+
+% ============================================================
+% SFONDO E LOGO
+% ============================================================
+\pgfdeclareimage[height=0.10\paperheight]{logo}{images/marchio_unipi_orizz_white.png}
+
+\setbeamertemplate{background}{%
+  \begin{tikzpicture}[overlay, remember picture]
+    \fill[UnipiBlue]
+      (current page.south west)
+      -- +(0, 0.08\paperheight)
+      -- +(\paperwidth, 0.18\paperheight)
+      -- (current page.south east)
+      -- cycle;
+    \node[
+      anchor=south east, inner sep=0pt, draw=none,
+      xshift=-0.018\paperheight, yshift=0.02\paperheight
+    ] at (current page.south east) {\pgfuseimage{logo}};
+  \end{tikzpicture}%
+}
+
+% ============================================================
+% TABELLE
+% ============================================================
+\renewcommand{\arraystretch}{1.2}
+\newcommand{\tableheadrow}{\rowcolor{SNSGold}}
+\newcommand{\tableheadcol}[1]{{\bfseries\color{BerkeleyBlue}#1}}
+\AtBeginEnvironment{tabular}{\color{black}}

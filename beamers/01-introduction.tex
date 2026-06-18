@@ -1,0 +1,53 @@
+\begin{frame}{Introduction}
+    The Intermediate Representation (IR) plays a key role in optimizing compilers; its semantics plays a dual role:
+    \begin{itemize}
+        \item It should be \textbf{tight} enough that source-level programs can be efficiently compiled to IR code
+        \item It should be \textbf{weak} enough to allow desirable IR-level optimization, and to facilitate the mapping onto the target instruction set
+    \end{itemize}
+    \begin{figure}
+    \centering
+    \scalebox{0.7}{
+    \begin{tikzpicture}[
+        node distance=0.5cm,
+        every node/.style={font=\small},
+        box/.style={
+            draw,
+            rounded corners,
+            minimum width=2.6cm,
+            minimum height=1cm,
+            align=center,
+            fill=BerkeleyTableBlue1!6
+        },
+        irbox/.style={
+            draw,
+            rounded corners,
+            minimum width=2.8cm,
+            minimum height=1.1cm,
+            align=center,
+            fill=UnipiBlue!9,
+            very thick
+        },
+        arrow/.style={-Latex, thick}
+    ]
+    
+    \node[box] (src) {Source code};
+    \node[box, right=of src] (front) {Front-end};
+    \node[irbox, right=of front] (ir) {Intermediate\\Representation\\\textbf{IR}};
+    \node[box, right=of ir] (opt) {Optimizations};
+    \node[box, right=of opt] (back) {Codegen};
+    
+    \draw[arrow] (src) -- (front);
+    \draw[arrow] (front) -- (ir);
+    \draw[arrow] (ir) -- (opt);
+    \draw[arrow] (opt) -- (back);
+    
+    \end{tikzpicture}}
+    \end{figure}
+    \pdfpcnote{
+Stress the tension: IR semantics must be tight enough for correct compilation
+from the source, but weak enough to permit aggressive optimizations. The pipeline
+diagram shows where IR sits — it is the interface between the front-end and all
+optimization passes. This dual role is the root cause of all the problems
+that follow.
+}
+\end{frame}

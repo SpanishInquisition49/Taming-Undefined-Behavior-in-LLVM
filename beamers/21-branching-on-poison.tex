@@ -1,0 +1,25 @@
+\begin{frame}[fragile]{Branching on poison}
+    \begin{columns}[c]
+        \begin{column}{0.54\textwidth}
+          Branching on poison is \textbf{immediate UB}, not only for fixing an inconsistency, but also enables the compiler to assume the condition \textbf{holds} in the block. The use of a \texttt{freeze} instruction could \textbf{disable} some optimizations, many of which were \textbf{illegal}
+        \end{column}
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+if(x>0) {
+    // safe to assume x > 0
+    foo
+} else {
+    // safe to assume x ≤ 0
+    bar
+}
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+    \pdfpcnote{
+Highlight the additional benefit of making branching on poison immediate UB: the
+compiler gains the right to assume the branch condition holds inside each branch
+body. This enables range propagation and value inference optimizations. Freeze
+re-introduces non-determinism selectively only where needed, without sacrificing
+these reasoning benefits.
+}
+\end{frame}

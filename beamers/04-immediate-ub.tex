@@ -1,0 +1,49 @@
+\begin{frame}[fragile]{Immediate Undefined Behaviour}
+  Assuming \texttt{c} is \texttt{true} most of the time, we might be tempted to simplify the function by removing the branching as follows:
+    \begin{columns}[c]
+        \begin{column}{0.44\textwidth}
+            \centering
+            \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+int fun(bool c, int v) {
+    int div = 0;
+    if (c) {
+        div = 42 / v;
+    }
+    return div;
+}
+            \end{lstlisting}
+        \end{column}
+
+        \begin{column}{0.08\textwidth}
+            \centering
+            \only<1>{\transform}
+            \only<2>{\illegaltransform}
+        \end{column}
+
+        \begin{column}{0.44\textwidth}
+            \centering
+            \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+int fun(bool c, int v) {
+    int div = 42 / v;
+    return c ? div : 0;
+}
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+    \uncover<2->{
+      However this is \textbf{illegal} since \texttt{fun(false, 0)} will trigger UB after optimization
+    }
+    \vfill
+\pdfpcnote{
+**First Reveal**<br/>
+Present the transformation as a plausible optimization: c is true most of the
+time, so hoisting the division looks reasonable. Stop here before revealing the
+problem — let the audience think about whether it is correct.<br/>
+**Second Reveal**<br/>
+The transformation is illegal: fun(false, 0) would divide by zero after the
+rewrite, introducing new immediate UB that did not exist in the original program.
+Key rule: a compiler transformation must not introduce UB that was absent in the
+source.
+}
+
+\end{frame}

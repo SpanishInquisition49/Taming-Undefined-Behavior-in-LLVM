@@ -1,0 +1,36 @@
+\begin{frame}[fragile]{Duplicate SSA Uses}
+  These two expressions are \textbf{algebraically equivalent}, and in both cases \texttt{y} holds an \emph{even} number. Does the compiler have the right to rewrite the expression?
+    \begin{columns}[c]
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[style=llvmmono]
+; y = 2x                
+%y = mul i32 2, %x
+            \end{lstlisting}
+        \end{column}
+        \begin{column}{0.08\textwidth}
+            \only<1>{\transform}
+           \only<2>{\illegaltransform} 
+        \end{column}
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[style=llvmmono]
+; y = x + x
+%y = add i32 %x, %x
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+    \only<2>{
+      \vspace{1.5em}
+      \textbf{No}: if \texttt{x} is \textbf{undef} then in the second case \texttt{y} could be any legal \texttt{i32} value.\\
+    However, LLVM \textbf{incorrectly} performs similar transformations
+    }
+    \pdfpcnote{
+**First Reveal**<br/>
+The two expressions are algebraically equivalent over integers. Ask the audience:
+does the compiler have the right to perform this rewrite?<br/>
+**Second Reveal**<br/>
+No. If x is undef, mul 2 undef picks one arbitrary value and doubles it — always
+even. But add undef undef reads undef twice, each time getting a potentially
+different value, so the result can be odd. LLVM incorrectly performed this
+rewrite. This is one of the key motivations for removing undef entirely.
+}
+\end{frame}

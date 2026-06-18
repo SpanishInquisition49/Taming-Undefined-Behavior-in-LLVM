@@ -1,0 +1,69 @@
+\begin{frame}{Poison Value Propagation}
+\begin{columns}[c]
+    \begin{column}{0.44\textwidth}
+       Poison value \textbf{taints} the Control Flow Graph; the majority of instructions return poison when any of their inputs is poison. Poison spreads until \textbf{immediate UB} is triggered, or is removed by the \textbf{select} instruction
+    \end{column}
+    \begin{column}{0.54\textwidth}
+       \begin{center}
+        \begin{figure}\scalebox{0.70}{
+        \begin{tikzpicture}[
+            node distance=1.2cm and 2cm,
+            instr/.style={
+                rectangle, rounded corners=3pt,
+                draw=UnipiBlue, thick,
+                fill=UnipiBlue!8,
+                font=\ttfamily\small,
+                minimum width=3.8cm, minimum height=0.7cm
+            },
+            poison/.style={
+                rectangle, rounded corners=3pt,
+                draw=UnipiRed!70!black, thick,
+                fill=UnipiRed!12,
+                font=\ttfamily\small,
+                minimum width=3.8cm, minimum height=0.7cm
+            },
+            arrow/.style={->, thick, draw=UnipiBlue},
+            parrow/.style={->, thick, draw=UnipiRed!70!black},
+            label/.style={font=\small\itshape, text=gray}
+        ]
+        
+        \node[instr] (a)  {\%a = INT\_MAX};
+        \node[instr, right=1cm of a] (b) {\%b = 1};
+        
+        \node[poison, below=of a, xshift=1.9cm] (add)
+            {\%res = add nsw \%a, \%b};
+        
+        \node[poison, below=of add] (cmp)
+            {\%cmp = icmp sgt \%res, \%a};
+        
+        \node[poison, below=of cmp] (br)
+            {br \%cmp, ...};
+        
+        \draw[arrow] (a.south) -- ++(0,-0.4) -| ([xshift=-0.5cm]add.north);
+        \draw[arrow] (b.south) -- ++(0,-0.4) -| ([xshift=0.5cm]add.north);
+        \draw[parrow] (add) -- (cmp);
+        \draw[parrow] (cmp) -- (br);
+        
+        \node[label, right=0.2cm of add] {\textcolor{UnipiRed!70!black}{$\rightarrow$ overflow}};
+        \node[label, right=0.2cm of cmp] {\textcolor{UnipiRed!70!black}{$\rightarrow$ poison}};
+        \node[label, right=0.2cm of br]  {\textcolor{UnipiRed!70!black}{$\rightarrow$ Immediate UB}};
+        
+        \node[draw=gray, rounded corners, fill=gray!5,
+              below=0.8cm of br, align=left, font=\small,
+              inner sep=6pt] {
+            \textcolor{UnipiBlue}{$\blacksquare$} normal value \quad
+            \textcolor{UnipiRed!70!black}{$\blacksquare$} poison value
+        };
+        
+        \end{tikzpicture}}
+        \end{figure}
+        \end{center} 
+    \end{column}
+\end{columns}
+\pdfpcnote{
+Trace the diagram top to bottom. Most instructions propagate poison: if any input
+is poison the output is poison. The chain continues until either a branch on
+poison is taken (immediate UB) or a “select” absorbs it. Mention that phi and
+select are the two exceptions that can stop propagation.
+}
+\end{frame}

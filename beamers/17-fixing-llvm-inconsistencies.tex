@@ -1,0 +1,38 @@
+\begin{frame}[fragile]{Fixing LLVM Inconsistencies}
+  With the new semantics, loop unswitching requires a \textbf{small} change to become sound
+    \begin{columns}[c]
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+while (c) {
+if (c2) { foo }
+else
+{ bar }
+}
+            \end{lstlisting}
+        \end{column}
+        \begin{column}{0.08\textwidth}
+            \transform
+        \end{column}
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+if (freeze(c2)) {
+    while (c) { foo }
+} else {
+    while (c) { bar }
+}
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+When a branch is hoisted out of a loop, the condition needs to be \textbf{frozen}\\
+\vspace{1.5em}
+Recall that branching on poison is \textbf{immediate UB}, so the GVN optimisation pass is sound and doesn't need changes 
+
+\pdfpcnote{
+With the new semantics, loop unswitching needs only a small patch: freeze the
+condition before branching on it outside the loop. This ensures the branch is on
+a concrete value, avoiding immediate UB. GVN requires no changes at all —
+branching on poison being immediate UB already validates the assumption GVN
+relied on. One fix, two passes made sound.
+}
+
+\end{frame}

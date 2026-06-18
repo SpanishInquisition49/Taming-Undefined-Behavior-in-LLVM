@@ -1,0 +1,15 @@
+\begin{frame}{Achievements}
+The new semantic is not a simple bug fix for the Loop Unswitching vs GVN bug
+    \begin{itemize}
+        \item Solve bugs in SimplifyCFG, InstCombine passes
+        \item Explicitly disable \textbf{illegal} transformations
+        \item Provide a \textbf{formal} operational semantics for freeze, poison and undef
+        \item Do \textbf{not} invalidate many optimization passes
+    \end{itemize}
+    \pdfpcnote{
+This is not a narrow bug fix but a redesign of the UB model for LLVM IR. It fixes
+multiple independent passes, provides a formal operational semantics verified
+using the Alive tool, and does not invalidate existing correct optimizations. The
+scope of the contribution is broader than it might first appear.
+}
+\end{frame}

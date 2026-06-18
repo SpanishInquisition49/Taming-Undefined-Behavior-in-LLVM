@@ -1,0 +1,19 @@
+\begin{frame}{Proposed semantics}
+  To solve those inconsistencies, without \emph{invalidating} optimization passes, the semantics were rearranged, enforcing the following rules:
+\begin{enumerate}
+    \item \textbf{Remove} undef and use only poison
+    \item \textbf{Introduce} the instruction \texttt{freeze}
+    \item All instructions over poison \textbf{except} \texttt{phi}, \texttt{select} and \texttt{freeze} return poison
+    \item Branching on poison is \textbf{immediate UB}
+\end{enumerate}
+
+\pdfpcnote{
+The four rules together resolve all the inconsistencies. 
+
+1. Dropping undef eliminates the duplicate-use bug.
+2. Introducing freeze gives an explicit escape hatch for non-determinism. 
+3. Making branching on poison immediate UB validates GVN and SimplifyCFG. 
+4. The exceptions for phi, select, and freeze preserve the optimizations that needed non-deterministic semantics 
+— be ready to explain why those three are special.
+}
+\end{frame}

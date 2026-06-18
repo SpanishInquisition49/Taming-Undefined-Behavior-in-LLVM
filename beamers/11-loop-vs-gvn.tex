@@ -1,0 +1,25 @@
+\begin{frame}{Loop Unswitching vs GVN}
+Those two optimizations require \textbf{different} semantics for branching on poison. \\
+By assuming different semantics, they perform \textbf{conflicting} optimizations, leading to end-to-end miscompilations.
+
+\vfill
+
+\centering
+\begin{tabular}{lcc}
+\toprule
+ & \textbf{Loop Unswitching} & \textbf{GVN} \\
+\midrule
+Branch on poison & non-det. choice & Immediate UB \\
+\midrule
+Sound if & branch $\neq$ UB & branch $=$ UB \\
+\bottomrule
+\end{tabular}
+\vfill
+\pdfpcnote{
+This is the central conflict of the paper. The two optimizations need
+contradictory semantics for branching on poison. LLVM had both passes with
+implicit conflicting assumptions, leading to real end-to-end miscompilations when
+both were applied in sequence. The table makes the contradiction crisp — pause
+here and let it sink in before moving on.
+}
+\end{frame}

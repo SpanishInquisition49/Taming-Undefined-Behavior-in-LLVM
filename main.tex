@@ -1,0 +1,322 @@
+%!TEX program = lualatex
+%%_requires compilation with XeLaTeX or LuaLaTeX
+\documentclass[10pt,xcolor={table,dvipsnames},t]{beamer}
+%%══════════════════════════════════════════════════════════════
+%% PRESENTATION SETTINGS
+%%══════════════════════════════════════════════════════════════
+\usepackage[overridenote]{pdfpc}
+%\usepackage[overridenote,hidenotes]{pdfpc}
+% "overridenote" must be specified as a package option
+\pdfpcsetup{
+    % Other settings can be package options, or can go here
+    duration=30,
+    lastminutes=2,
+}
+
+% ============================================================
+% LANGUAGE
+% ============================================================
+% Italiano
+%\usepackage[italian]{babel}
+%\usepackage[autostyle, italian=guillemets]{csquotes}
+% Inglese
+\usepackage[british]{babel}
+\usepackage[autostyle]{csquotes}
+
+%%══════════════════════════════════════════════════════════════
+%% THEME & COLORS
+%%══════════════════════════════════════════════════════════════
+\usetheme{SNSPisa}  % Template Unipi
+
+%%══════════════════════════════════════════════════════════════
+%% GRAPHICS & IMAGES
+%%══════════════════════════════════════════════════════════════
+\usepackage{tikz}
+\usetikzlibrary{
+    positioning,      % posizionamento relativo nodi
+    arrows.meta,      % frecce moderne
+    shapes.geometric, % forme geometriche
+    fit               % creare nodi che racchiudono altri nodi
+}
+\usepackage{svg}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{groupplots}  % grafici multipli in griglia
+\pgfplotsset{compat=1.18}        % versione più recente stabile
+
+%%══════════════════════════════════════════════════════════════
+%% MATHEMATICS
+%%══════════════════════════════════════════════════════════════
+\usepackage{amsmath}  % equazioni matematiche avanzate
+\usepackage{amssymb}  % simboli matematici aggiuntivi
+\usepackage{proof}    % inference rules
+\usepackage{bussproofs}
+\usepackage{stmaryrd} % semantics brackets
+\usepackage{mathrsfs}
+
+%%══════════════════════════════════════════════════════════════
+%% CODE LISTINGS
+%%══════════════════════════════════════════════════════════════
+\usepackage{listings}      % presentazione codice sorgente
+\lstset{
+  escapeinside={(*@}{@*)}
+}
+\usepackage{lstautogobble} % rimuove l'indentazione automatica del codice
+\usepackage{llvmlisting}   % stile specifico per LLVM-IR
+\usepackage{fontspec}
+\setmonofont{JetBrains Mono}[Scale=MatchLowercase]
+
+%%══════════════════════════════════════════════════════════════
+%% TYPOGRAPHY & FORMATTING
+%%══════════════════════════════════════════════════════════════
+\usepackage[onehalfspacing]{setspace}  % interlinea 1.5
+\usepackage{booktabs}                  % tabelle professionali
+\usepackage{xcolor}                    % gestione colori (aggiunto esplicitamente)
+
+%%══════════════════════════════════════════════════════════════
+%% TABLES
+%%══════════════════════════════════════════════════════════════
+\usepackage{booktabs}
+
+%%══════════════════════════════════════════════════════════════
+%% BIBLIOGRAPHY
+%%══════════════════════════════════════════════════════════════
+%\usepackage[
+%    backend=biber,        % motore di biber (meglio di bibtex)
+%    bibstyle=ieee,        % stile IEEE (numerico)
+%    citestyle=numeric,    % citazioni numeriche
+%    giveninits=true,      % iniziali per il nome
+%    url=false             % non mostrare URL nelle citazioni
+%]{biblatex}
+%\addbibresource{bibliography.bib}           % file bibliografico
+%\renewcommand*{\newunitpunct}{\addcomma\space}  % virgola invece di punto
+%\renewcommand*{\revsdnamepunct}{}           % rimuovi virgola nome/cognome
+%\renewcommand\mkbibnamefamily[1]{\textsc{#1}}   % cognome in maiuscoletto
+
+%%══════════════════════════════════════════════════════════════
+%% TITLE INFORMATION
+%%══════════════════════════════════════════════════════════════
+\title[LLVM-IR-UB]{\textbf{Taming Undefined Behavior\\in LLVM}}
+\subtitle{
+\footnotesize{
+\vspace{2em}
+\textbf{\emph{Authors:}} Juneyoung Lee, Yoonseung Kim, Youngju Song, Chung-Kil Hur, Sanjoy Das, John Regehr, David Majnemer, Nuno P. Lopes\\
+\vspace{1.5em}
+\textbf{\emph{Affiliations:}} Seoul National University, Azul Systems, University of Utah, Google, Microsoft Research}
+}
+\author{Gabriele Scannagatti}
+\date{June 2026}
+
+%%══════════════════════════════════════════════════════════════
+%% FOOTER CONFIGURATION
+%%══════════════════════════════════════════════════════════════
+\setbeamertemplate{footline}{
+  \ifnum\insertframenumber>0
+    \begin{beamercolorbox}[wd=\paperwidth, ht=0.08\paperheight,
+                           center, dp=0pt]{footline}
+      \centering
+      \raisebox{0.025\paperheight}{%
+        \scriptsize\color{white}%
+        \insertframenumber\,/\,\inserttotalframenumber%
+      }
+    \end{beamercolorbox}%
+  \fi
+}
+
+%%══════════════════════════════════════════════════════════════
+%% CUSTOM COMMANDS
+%%══════════════════════════════════════════════════════════════
+\setbeamertemplate{bibliography item}[text]  % stile voci bibliografia
+
+%% Simboli per trasformazioni LLVM-IR
+\newcommand{\illegaltransform}{%   % trasformazione illegale (≠)
+    {\LARGE$\neq$}%
+}
+
+\newcommand{\legaltransform}{      % trasformazione legale (=)
+    {\LARGE$=$}
+}
+
+\newcommand{\transform}{           % freccia di trasformazione (⇒)
+    {\LARGE$\Rightarrow$}
+}
+
+\newcommand{\ruletag}[1]{\tag{\textsc{#1}}}
+
+%%══════════════════════════════════════════════════════════════
+%% DOCUMENT BEGIN
+%%══════════════════════════════════════════════════════════════
+\begin{document}
+
+%%══════════════════════════════════════════════════════════════
+%% TITLE SLIDE
+%%══════════════════════════════════════════════════════════════
+\begin{frame}[noframenumbering]
+  \titlepage
+  \pdfpcnote{
+Briefly introduce the paper and its authors. Mention this is a PLDI 2017 work
+that had concrete impact on the LLVM codebase. Set expectations: the talk covers
+the problem, why it was hard, and the proposed fix.
+}
+\end{frame}
+
+%%══════════════════════════════════════════════════════════════
+%% INTRODUCTION
+%%══════════════════════════════════════════════════════════════
+\input{beamers/01-introduction}
+
+%%══════════════════════════════════════════════════════════════
+%% HERE BE DRAGONS!
+%%══════════════════════════════════════════════════════════════
+\input{beamers/02-here-be-dragons}
+
+%%══════════════════════════════════════════════════════════════
+%% WHAT IS UNDEFINED BEHAVIOUR
+%%══════════════════════════════════════════════════════════════
+\input{beamers/03-what-is-ub}
+
+%%══════════════════════════════════════════════════════════════
+%% IMMEDIATE UNDEFINED BEHAVIOUR
+%%══════════════════════════════════════════════════════════════
+\input{beamers/04-immediate-ub}
+
+%%══════════════════════════════════════════════════════════════
+%% UNDEF VALUES
+%%══════════════════════════════════════════════════════════════
+\input{beamers/05-undef-val}
+
+%%══════════════════════════════════════════════════════════════
+%% POISON VALUES
+%%══════════════════════════════════════════════════════════════
+\input{beamers/06-poison-val}
+
+%%══════════════════════════════════════════════════════════════
+%% POISON VALUE PROPAGATION
+%%══════════════════════════════════════════════════════════════
+\input{beamers/07-poison-propagation}
+
+%%══════════════════════════════════════════════════════════════
+%% DUPLICATE SSA Uses
+%%══════════════════════════════════════════════════════════════
+\input{beamers/08-duplicate-ssa}
+
+%%══════════════════════════════════════════════════════════════
+%% LOOP UNSWITCHING
+%%══════════════════════════════════════════════════════════════
+\input{beamers/09-loop-unswitching}
+
+%%══════════════════════════════════════════════════════════════
+%% GLOBAL VALUE NUMBERING
+%%══════════════════════════════════════════════════════════════
+\input{beamers/10-gvn}
+
+%%══════════════════════════════════════════════════════════════
+%% LOOP UNSWITCHING VS GVN
+%%══════════════════════════════════════════════════════════════
+
+\input{beamers/11-loop-vs-gvn}
+%%══════════════════════════════════════════════════════════════
+%% POISON AND SELECT
+%%══════════════════════════════════════════════════════════════
+\input{beamers/12-poison-select-pt1}
+
+%%══════════════════════════════════════════════════════════════
+%% POISON AND SELECT
+%%══════════════════════════════════════════════════════════════
+\input{beamers/13-poison-select-pt2}
+
+%%══════════════════════════════════════════════════════════════
+%% SCARED YET?
+%%══════════════════════════════════════════════════════════════
+\input{beamers/14-scared-yet}
+
+%%══════════════════════════════════════════════════════════════
+%% PROPOSED SEMANTICS
+%%══════════════════════════════════════════════════════════════
+\input{beamers/15-proposed-semantics}
+
+%%══════════════════════════════════════════════════════════════
+%% THE FREEZE INSTRUCTION
+%%══════════════════════════════════════════════════════════════
+\input{beamers/16-freeze-instr}
+
+%%══════════════════════════════════════════════════════════════
+%% FIXING LLVM INCONSISTENCIES
+%%══════════════════════════════════════════════════════════════
+\input{beamers/17-fixing-llvm-inconsistencies}
+
+%%══════════════════════════════════════════════════════════════
+%% REVERSE PREDICATION
+%%══════════════════════════════════════════════════════════════
+\input{beamers/18-reverse-predication}
+
+%%══════════════════════════════════════════════════════════════
+%% FREEZE DUPLICATION
+%%══════════════════════════════════════════════════════════════
+\input{beamers/19-bitfields.tex}
+
+%%══════════════════════════════════════════════════════════════
+%% FREEZE DUPLICATION
+%%══════════════════════════════════════════════════════════════
+\input{beamers/20-freeze-duplication}
+
+%%══════════════════════════════════════════════════════════════
+%% BRANCHING ON POISON
+%%══════════════════════════════════════════════════════════════
+\input{beamers/21-branching-on-poison}
+
+%%══════════════════════════════════════════════════════════════
+%% FIXED PASSES
+%%══════════════════════════════════════════════════════════════
+\input{beamers/22-fixed-passes}
+
+%%══════════════════════════════════════════════════════════════
+%% BENCHMARKS: COMPILER
+%%══════════════════════════════════════════════════════════════
+\input{beamers/23-benchmark-compiler}
+
+%%══════════════════════════════════════════════════════════════
+%% BENCHMARKS: ARTIFACT
+%%══════════════════════════════════════════════════════════════
+\input{beamers/24-benchmark-artifacts}
+
+%%══════════════════════════════════════════════════════════════
+%% CONCLUSION
+%%══════════════════════════════════════════════════════════════
+\input{beamers/25-conclusion}
+
+%%══════════════════════════════════════════════════════════════
+%% THANKS FOR YOUR ATTENTION
+%%══════════════════════════════════════════════════════════════
+\begin{frame}[plain, noframenumbering, label=thankyou]
+  \begin{tikzpicture}[overlay, remember picture]
+    \fill[UnipiBlue]
+      ([yshift=-0.42\paperheight] current page.north east) --
+      (current page.south east) --
+      ([yshift=0.08\paperheight] current page.south west) --
+      cycle;
+    \node[anchor=south east, inner sep=0pt, draw=none,
+          xshift=-0.018\paperheight, yshift=0.02\paperheight]
+      at (current page.south east)
+      {\pgfuseimage{logo}};
+  \end{tikzpicture}
+ 
+
+  %--- Main title ---%
+  \vfill
+  \begin{center}
+    {\rmfamily\mdseries\fontsize{36}{42}\selectfont\color{BerkeleyBlueText}
+      Thanks for your attention}
+ 
+    \vspace{0.05cm}
+    {\color{UnipiBlue!50}\rule{0.5\textwidth}{0.5pt}}
+    \vspace{0.6cm}
+ 
+    %{\large\color{BerkeleyBlueText} Subtext}
+  \end{center}
+  \vfill
+ 
+\end{frame}
+
+
+\end{document}

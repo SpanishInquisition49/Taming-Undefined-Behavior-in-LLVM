@@ -1,0 +1,36 @@
+\begin{frame}[fragile]{Freeze Duplication}
+  Duplication of \texttt{freeze} instructions is \textbf{not} allowed, since every invocation yields a \textbf{different} result
+    \begin{columns}[c]
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+x = a/b;
+y = freeze(x);
+while(...) {
+    use(y);
+}
+            \end{lstlisting}
+        \end{column}
+        \begin{column}{0.08\textwidth}
+            \illegaltransform
+        \end{column}
+        \begin{column}{0.44\textwidth}
+           \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+while(...) {
+    x = a/b;
+    (*@\textcolor{UnipiRed}{y = freeze(x);}@*)
+    use(y);
+}     
+           \end{lstlisting} 
+        \end{column}
+    \end{columns}
+    Therefore, sinking a \texttt{freeze} instruction makes the transformation unsound:\\
+The value of \texttt{y} could \textbf{change} after every iteration when sinking a \texttt{freeze}
+
+\pdfpcnote{
+Freeze cannot be sunk into a loop. Each invocation on a poison value picks an
+independent arbitrary value — sinking it means a new arbitrary value is chosen on
+every iteration, changing the observable behaviour of the program. This is a key
+constraint that optimization passes moving code around must respect.
+}
+
+\end{frame}

@@ -1,0 +1,68 @@
+\newsavebox{\boxAddNoNsw}
+\begin{lrbox}{\boxAddNoNsw}
+\begin{minipage}{0.44\textwidth}
+\begin{lstlisting}[style=llvmmono]
+; a + b > a
+%res = add i32 %a, %b
+%cmp = icmp sgt i32 %res, %a
+\end{lstlisting}
+\end{minipage}
+\end{lrbox}
+
+\newsavebox{\boxAddNsw}
+\begin{lrbox}{\boxAddNsw}
+\begin{minipage}{0.44\textwidth}
+\begin{lstlisting}[style=llvmmono]
+; a + b > a
+%res = add (*@\textbf{\textit{\textcolor{UnipiGreen}{nsw}}}@*) i32 %a, %b
+%cmp = icmp sgt i32 %res, %a
+\end{lstlisting}
+\end{minipage}
+\end{lrbox}
+
+\newsavebox{\boxCmp}
+\begin{lrbox}{\boxCmp}
+\begin{minipage}{0.44\textwidth}
+\begin{lstlisting}[style=llvmmono]
+; b > 0
+%cmp = icmp sgt i32 %b, 0
+\end{lstlisting}
+\end{minipage}
+\end{lrbox}
+
+\begin{frame}{Deferred UB: Poison Values}
+If the compiler considers the existence of overflow, the transformation below is illegal:
+\vspace{0.5em}
+\begin{columns}[c]
+    \begin{column}{0.44\textwidth}
+        \centering
+        \only<1>{\usebox{\boxAddNoNsw}}
+        \only<2>{\usebox{\boxAddNsw}}
+    \end{column}
+    \begin{column}{0.08\textwidth}
+        \centering
+        \only<1>{\illegaltransform}
+        \only<2>{\legaltransform}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+        \centering
+        \usebox{\boxCmp}
+    \end{column}
+\end{columns}
+\vspace{0.5em}
+\only<2>{
+To justify this transformation, the \textbf{\textit{nsw}} (no signed wrap) attribute is introduced, which returns the \textbf{poison} value on signed overflow, enabling \textbf{speculative} execution
+}
+\pdfpcnote{
+**First Reveal**<br/>
+Without any annotation, the transformation is illegal: a+b can overflow and wrap,
+so `a+b > a` does not imply `b > 0` in signed two complement arithmetic. The
+compiler has no right to make that simplification.<br/>
+**Second Reveal**<br/>
+The nsw (no signed wrap) flag asserts that overflow cannot happen. If it does,
+the result is poison — a deferred UB value that propagates forward. This lets
+the compiler treat the addition as if signed arithmetic holds, enabling the
+comparison simplification. Be ready for the question: what is the difference
+between undef and poison?
+}
+\end{frame}

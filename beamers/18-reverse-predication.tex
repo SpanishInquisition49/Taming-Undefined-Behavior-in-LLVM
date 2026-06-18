@@ -1,0 +1,33 @@
+\begin{frame}[fragile]{Reverse Predication}
+For some CPU architectures, select instructions are rewritten as branches 
+    \begin{columns}[c]
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[style=llvmmono]
+%x = select %c, %a, %b
+            \end{lstlisting}
+        \end{column}
+        \begin{column}{0.08\textwidth}
+            \transform
+        \end{column}
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[style=llvmmono]
+    %c2 = freeze %c
+    br %c2, %true, %false
+; ...
+merge:
+    %x = phi [ %a, %true ],
+        [ %b, %false ]
+
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+    The \texttt{freeze} instruction \textbf{avoids} the branch on poison, making this transformation legal
+
+    \pdfpcnote{
+Some architectures have no select instruction, so codegen must lower a select
+back into a branch. With the new semantics this requires freezing the condition
+first to avoid branching on poison, which would be immediate UB. Without freeze,
+this lowering step would be unsound under the new model.
+}
+
+\end{frame}

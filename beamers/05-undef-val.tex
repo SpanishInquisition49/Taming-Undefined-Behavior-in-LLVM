@@ -1,0 +1,30 @@
+\begin{frame}[fragile]{Deferred UB: Undefined Values}
+  Undefined values are useful since they \textbf{avoid} the need to materialize an arbitrary constant in situations where the exact value does not matter
+    \begin{columns}[c]
+       \begin{column}{0.44\textwidth}
+        \begin{lstlisting}[language=C, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+int x;
+if (cond)
+    x = 42;
+use(x);
+        \end{lstlisting}
+       \end{column}
+       \begin{column}{0.08\textwidth}
+           \transform
+       \end{column}
+       \begin{column}{0.44\textwidth}
+           \begin{lstlisting}[style=llvmmono]
+%x = select %cond, 42, undef 
+call @use(%x)
+           \end{lstlisting}
+       \end{column}
+    \end{columns}
+    Reading on \texttt{undef} materialize a \textbf{different} value every time
+    \pdfpcnote{
+Explain undef as a placeholder that can materialize as any value at every use —
+crucially, each read can pick a different value independently. The select example
+shows how the front-end uses undef to avoid materializing an arbitrary constant
+when only one branch assigns the variable. This "free choice at each use" is what
+makes undef both useful and dangerous.
+}
+\end{frame}

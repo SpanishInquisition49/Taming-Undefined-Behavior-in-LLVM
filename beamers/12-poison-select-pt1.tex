@@ -1,0 +1,35 @@
+\begin{frame}[fragile]{Select: SimplifyCFG}
+The SimplifyCFG optimization tries to convert control flow in select instructions
+    \begin{columns}[c]
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[style=llvmmono]
+    br %cond, %true, %false
+true:
+    br %merge
+false:
+    br %merge
+merge:
+    %x = phi [ %a, %true ], 
+        [ %b, %false ]
+            \end{lstlisting}
+        \end{column}
+        \begin{column}{0.08\textwidth}
+            \transform
+        \end{column}
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[style=llvmmono]
+    br %merge
+merge:
+    %x = select %cond, %a, %b
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+This transformation is legal if \textbf{both} branching on poison and select on poison are not immediate UB. Moreover, it can only be poison when the chosen value at runtime is poison
+\pdfpcnote{
+SimplifyCFG converts a diamond-shaped CFG into a single select instruction. This
+is legal only if neither branching nor selecting on poison is immediate UB.
+Crucially, select must propagate poison only when the chosen value is poison, not
+when the condition is poison — otherwise the transformation introduces spurious
+poison that was not present in the original CFG.
+}
+\end{frame}

@@ -1,0 +1,33 @@
+\begin{frame}[fragile]{Global Value Numbering}
+  Global Value Numbering (GVN) is an optimization that finds equivalent expressions and then picks a representative one, \textbf{removing} redundant computation
+    \begin{columns}[c]
+        \begin{column}{0.44\textwidth}
+           \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+t = x + 1;
+if (t == y) {
+    w = x + 1;
+    foo(w);
+}
+           \end{lstlisting} 
+        \end{column}
+        \begin{column}{0.08\textwidth}
+            \transform        
+        \end{column}
+        \begin{column}{0.44\textwidth}
+           \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+t = x + 1;
+if (t == (*@\textcolor{UnipiRed}{y}@*)) {
+    foo((*@\textcolor{UnipiRed}{y}@*));
+}
+           \end{lstlisting} 
+        \end{column}
+    \end{columns}
+    This is legal if branching on poison is considered \textbf{immediate UB}, the transformation would be unsound otherwise
+    \pdfpcnote{
+GVN eliminates redundant computations by recognizing equivalent expressions.
+Inside if (t == y), the compiler knows t and y are equal, so it replaces w = x+1
+with y. This is only valid if the equality is a reliable fact — which requires
+that branching on poison IS immediate UB, so the condition is guaranteed to hold
+in the branch body.
+}
+\end{frame}

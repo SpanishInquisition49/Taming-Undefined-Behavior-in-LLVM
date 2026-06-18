@@ -1,0 +1,37 @@
+\begin{frame}[fragile]{The freeze instruction}
+The \texttt{freeze} instruction is a \textbf{no-op}, unless its input is poison, in which case it non-deterministically chooses an \textbf{arbitrary} legal value.
+
+\begin{lstlisting}[style=llvmmono]
+    %x = freeze(poison) ; (*@x\leftarrow 42@*)
+    %y = freeze(poison) ; (*@y\leftarrow 23@*)
+\end{lstlisting}
+\vspace{1.5em}
+The semantics of the \texttt{r = freeze i<sz> op}
+\begin{columns}[T]
+    \begin{column}{0.44\textwidth}
+         \begin{prooftree}
+           \AxiomC{$\mathscr{E}\llbracket op \rrbracket_R = v \neq \textbf{poison}$}
+            \UnaryInfC{$\text{R,M} \hookrightarrow \text{R}[r \mapsto v]\text{,M}$}
+        \end{prooftree}       \begin{center}
+        \end{center}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+        \begin{center}
+        \begin{prooftree}
+          \AxiomC{$\mathscr{E}\llbracket op \rrbracket_R = \textbf{poison} \quad v \in Num(sz)$}
+            \UnaryInfC{$\text{R,M} \hookrightarrow \text{R}[r \mapsto v]\text{,M}$}
+        \end{prooftree}
+        \end{center}
+    \end{column}
+\end{columns}
+
+\pdfpcnote{
+Freeze is a no-op on normal values and a non-deterministic concretization on
+poison. Crucially, each invocation is independent — the example shows two freezes
+of the same poison yielding different values (42 and 49). The formal rules on the
+right show the two cases: pass-through for normal values, arbitrary choice from
+Num(sz) for poison. **Note:** that freeze is deterministic per execution but
+non-deterministic across executions.
+}
+
+\end{frame}

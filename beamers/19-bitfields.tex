@@ -1,0 +1,28 @@
+\begin{frame}[fragile]{Bit Fields}
+  Loading \textbf{uninitialised} data yields poison, to \textbf{ensure} that a bit field store does not always yield poison the code is lowered as follows:
+ \begin{columns}[c]
+   \begin{column}{0.44\textwidth}
+     \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+mystruct.myfield = foo;
+     \end{lstlisting}
+   \end{column}
+   \begin{column}{0.08\textwidth}
+     \transform
+   \end{column}
+   \begin{column}{0.44\textwidth}
+     \begin{lstlisting}[style=llvmmono]
+%v = load %mystruct
+%v2 = freeze %v
+%v3 = ...combine %v2 and %foo...
+store %v3, %mystruct
+     \end{lstlisting}
+   \end{column}
+ \end{columns}
+ If this was the \textbf{first} assignment, the loaded value \emph{might} be uninitialised, the \texttt{freeze} \textbf{stops} the poison propagation and ensure the assignment is performed correctly
+ \pdfpcnote{
+Writing to a bit field requires a read-modify-write: the compiler loads the whole
+struct first, then masks in the new value, then stores back. If the struct is
+uninitialised, the load yields poison. The freeze stops the propagation before
+the combine and ensure the store is always well-defined.
+}
+\end{frame}

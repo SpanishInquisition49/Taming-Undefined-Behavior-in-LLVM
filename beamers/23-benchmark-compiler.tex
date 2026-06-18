@@ -1,0 +1,17 @@
+\begin{frame}{Benchmark: Compiler}
+    The proposed solution has \textbf{negligible} practical cost:
+   \begin{itemize}
+       \item \textbf{Compile Time}\\
+         Compilation time oscillated between $\boldsymbol{\pm 1\%}$ in the majority of test cases
+        \item \textbf{Memory Usage}\\
+          Memory consumption was largely unaffected, with a maximum increase of \textbf{2\%}
+        \item \textbf{Comparing IR}\\
+          Only the \textbf{26\%} of test cases had different IR, and even in the majority of cases, the emitted assembly was the \textbf{same}
+   \end{itemize} 
+   \pdfpcnote{
+The overhead is negligible in practice. Compilation time varies by at most ±1%,
+memory by at most 2\%. Only 26\% of test cases produce different IR at all, and
+most of those still emit identical assembly — meaning the new semantics rarely
+trigger different code generation paths.
+}
+\end{frame}

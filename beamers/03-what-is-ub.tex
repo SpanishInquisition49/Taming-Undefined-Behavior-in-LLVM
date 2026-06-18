@@ -1,0 +1,31 @@
+\begin{frame}{What is Undefined Behaviour}
+  Undefined Behaviour (UB) is a set of \textbf{erroneous} operations that may cause the system to behave badly. LLVM distinguish two categories of UB:
+\begin{columns}[T]
+    \begin{column}{0.44\textwidth}
+        \begin{center}
+        \large{\textbf{Immediate UB}}\\
+        \end{center}
+        Errors that have serious consequences.
+        \begin{itemize}
+            \item A division by zero
+            \item Dereferencing a \texttt{null} pointer
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+        \begin{center}
+        \large{\textbf{Deferred UB}}\\
+        \end{center}
+        Operations that may produce unpredictable values.
+        \begin{itemize}
+            \item Signed integers overflow
+            \item The value of an unassigned variable
+        \end{itemize}
+    \end{column}
+\end{columns}
+\pdfpcnote{
+Introduce the two-category taxonomy. Immediate UB halts the system immediately —
+the compiler cannot hoist code past it. Deferred UB produces a bad value but
+execution continues — this is what enables speculative optimizations. Keep this
+brief; the next slides go into each case in detail.
+}
+\end{frame}

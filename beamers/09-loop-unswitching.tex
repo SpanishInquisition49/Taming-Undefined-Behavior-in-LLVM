@@ -1,0 +1,33 @@
+\begin{frame}[fragile]{Loop Unswitching}
+  If \texttt{c2} is a loop invariant, the compiler could hoist the if condition \textbf{out} the loop
+    \begin{columns}[c]
+        \begin{column}{0.44\textwidth}
+            \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+while(c) {
+    if (c2) { foo }
+    else { bar }
+} 
+            \end{lstlisting}
+        \end{column}
+        \begin{column}{0.08\textwidth}
+            \transform    
+        \end{column}
+        \begin{column}{0.44\textwidth}
+           \begin{lstlisting}[language=C++, frame=single, xleftmargin=4pt, xrightmargin=4pt]
+if((*@\textcolor{UnipiRed}{c2}@*)) {
+    while(c) { foo }
+} else {
+    while(c) { bar }
+}
+           \end{lstlisting} 
+        \end{column}
+    \end{columns}
+    This is legal if branching on poison is not considered immediate UB, but rather a \textbf{non-deterministic} choice
+    \pdfpcnote{
+Loop unswitching hoists a loop-invariant condition outside the loop to avoid
+re-evaluating it on every iteration. If c2 is poison the branch is taken
+non-deterministically — that is acceptable here because we are only choosing
+which loop body to execute, not introducing new behaviour. The transformation is
+sound only if branching on poison is NOT immediate UB.
+}
+\end{frame}

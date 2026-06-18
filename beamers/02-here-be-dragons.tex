@@ -1,0 +1,20 @@
+\begin{frame}{Here be Dragons!}
+    \begin{columns}[c]
+        \begin{column}{0.54\textwidth}
+            Undefined behaviour related to compiler optimizations is often thought of as \emph{“black magic”}, even by compiler developers.\\
+            Before taming the \emph{“dragon”}, we must understand what Undefined Behaviour is, and why it is so important in compilers
+        \end{column}
+        \begin{column}{0.44\textwidth}
+            \begin{figure}
+                \centering
+                \includegraphics[width=\linewidth]{images/dragon.jpg}
+            \end{figure}
+        \end{column}
+    \end{columns}
+    \pdfpcnote{
+    Use this as a narrative hook. UB in compiler IR is notoriously misunderstood —
+    even LLVM developers got it wrong, as the bugs shown later prove. The "dragon"
+    metaphor frames the rest of the talk: we need to understand the beast before
+    taming it.
+    }
+\end{frame}

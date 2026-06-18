@@ -1,0 +1,27 @@
+\begin{frame}[fragile]{Select: InstCombine}
+Often, it is desirable to view select as arithmetic, allowing these transformations:
+   \begin{columns}[c]
+       \begin{column}{0.44\textwidth}
+           \begin{lstlisting}[style=llvmmono]
+%x = select i1 %c, true, %b
+           \end{lstlisting}
+       \end{column}
+       \begin{column}{0.08\textwidth}
+           \transform
+       \end{column}
+       \begin{column}{0.44\textwidth}
+           \begin{lstlisting}[style=llvmmono]
+%x = or i1 %c, %b
+           \end{lstlisting}
+       \end{column}
+   \end{columns}
+   To allow these transformations, select \textbf{must} return poison if any of its arguments is poison. This semantics, however, \textbf{contradicts} the semantics required by the SimplifyCFG optimization.\\
+   \vspace{0.5em}
+   LLVM implements \textbf{different} semantics for select, leading to miscompilations
+\pdfpcnote{
+InstCombine wants to treat select as arithmetic, which requires select to
+propagate poison on any poisoned argument — including a poisoned condition. This
+directly contradicts what SimplifyCFG needs. LLVM implemented different semantics
+for the two cases, silently. Another concrete instance of the same root problem.
+}
+\end{frame}
